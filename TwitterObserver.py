@@ -76,7 +76,7 @@ def record_followers(screen_name):
     Retrieve followers for screen_name from Twitter and write them to disk.
     Will use request_token from [global] unless one is specified in [user].
     """
-    debug("Recording followers for @%s." % screen_name)
+    debug("--- record_followers('%s')" % screen_name)
     if NOAPI:
         debug("Twitter API disabled. Returning.")
         return
@@ -140,7 +140,6 @@ def main():
                 record_followers(screen_name)
         except ConfigParser.NoOptionError:
             pass
-
     display_report()
 
 if __name__ == '__main__':
