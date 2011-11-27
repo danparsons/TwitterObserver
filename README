@@ -3,8 +3,9 @@ users.
 
 It's designed to be run from cron once per day. It will record a user's
 followers, friends and other stuff to disk and then tell you what the
-differences are, via email, web report and Twitter DMs. In this way, you 
-can see who stopped following you, who started following you, etc.
+differences are between right now and yesterday, via email, web report 
+and Twitter DMs. In this way, you can see who stopped following you, who
+started following you, etc.
 
 The design allows for scanning multiple users (not just yourself) and from 
 multiple points of view (different oAuth sessions, different HTTP proxies.)
