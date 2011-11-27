@@ -10,6 +10,7 @@ import optparse
 import tweepy
 
 _config = {}
+_report = {}
 DEBUG = False
 RETRY_COUNT=0
 RETRY_DELAY=0
@@ -22,6 +23,18 @@ def debug(msg):
     """Print debugging messages"""
     if DEBUG:
         print msg
+
+
+def report(screen_name, section, msg):
+    """Handle filling out _report"""
+    global _report
+    if screen_name not in _report.keys():
+        _report[screen_name] = {}
+    if section not in _report[screen_name].keys():
+        _report[screen_name][section] = ''
+    else:
+        _report[screen_name][section] += ', '
+    _report[screen_name][section] += msg
 
 
 def process_arguments():
@@ -91,6 +104,19 @@ def record_followers(screen_name):
     debug("Writing followers to %s in pickle format." % followers_file)
     cPickle.dump(followers, open(followers_file, 'wb'))
     
+def display_report():
+    """Parse _report and display it"""
+    for screen_name in _report:
+        title = "Report for %s:" % screen_name
+        bar = ""
+        for x in range(len(title)):
+            bar += '-'
+        print title
+        print bar
+        for section in _report[screen_name]:
+            print "%s: %s" % (section, _report[screen_name][section])
+        print
+
 
 def main():
     global DEBUG
@@ -106,6 +132,7 @@ def main():
         except ConfigParser.NoOptionError:
             pass
 
+    display_report()
 
 if __name__ == '__main__':
     main()
