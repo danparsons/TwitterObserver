@@ -17,7 +17,8 @@ RETRY_COUNT=0
 RETRY_DELAY=0
 
 TODAY=datetime.datetime.now().strftime("%Y-%m-%d")
-YESTERDAY=(datetime.datetime.now() - datetime.timedelta(days = 1)).strftime("%Y-%m-%d")
+YESTERDAY=(datetime.datetime.now() -
+          datetime.timedelta(days = 1)).strftime("%Y-%m-%d")
 
 
 def debug(msg):
@@ -81,7 +82,7 @@ def record_followers(screen_name):
         return
     # If there is a request_token specified in the [user] section, then
     # use it. Otherwise, use the one from global.
-    if (_config.has_option(screen_name, 'request_token_key') and 
+    if (_config.has_option(screen_name, 'request_token_key') and
         _config.has_option(screen_name, 'request_token_secret')):
         debug("Using request_token from [%s] section." % screen_name)
         key = _config.get(screen_name, 'request_token_key')
@@ -109,7 +110,6 @@ def record_followers(screen_name):
     followers_file = os.path.join(db_dir, TODAY + ".p")
     debug("Writing followers to %s in pickle format." % followers_file)
     cPickle.dump(followers, open(followers_file, 'wb'))
-    
 def display_report():
     """Parse _report and display it"""
     for screen_name in _report:
@@ -127,7 +127,8 @@ def display_report():
 def main():
     global DEBUG, NOAPI
     options = process_arguments()
-    if options.debug: DEBUG = True
+    if options.debug:
+        DEBUG = True
     if options.noapi:
         NOAPI = True
     load_config(options.config)
