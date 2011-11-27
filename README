@@ -26,7 +26,8 @@ o Not all features are implemented yet. I just started! I'll write usage docs
   when the tool is more complete. For now, look at -h and example_config.conf.
 
 o Due to Twitter's pagination and API rate limiting, you can easily run out
-  of API requests when scanning a user with a lot of followers.
+  of API requests when scanning a user with a lot of followers. You get 150
+  API calls per hour, and Twitter returns only 100 followers per call.
 
 --Dan Parsons, @danparsons
 https://github.com/danparsons/TwitterObserver
