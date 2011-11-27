@@ -72,21 +72,17 @@ def record_followers(screen_name):
         secret = _config.get('global', 'request_token_secret')
     auth = tweepy.OAuthHandler('', '', secure=True)
     auth.set_request_token(key, secret)
-    api = tweepy.API(auth, secure=True, host="hozro.moo.cat")
+    api = tweepy.API(auth, secure=True)
     api.retry_count = RETRY_COUNT
     api.retry_delay = RETRY_DELAY
     # Retrieving id instead of screen_name in case a follower changes their
     # screen_name.
     followers_iter = tweepy.Cursor(api.followers, id=screen_name).items()
-    followers = []
+    followers = {}
     debug("Receiving followers now.")
     for follower in followers_iter:
-        followers.append(follower.id)
+        followers[follower.id] = follower.screen_name
     debug("Done receiving followers.")
-    # Sorting because sometimes Twitter returns followers in a different order
-    debug("Sorting followers.")
-    followers.sort()
-    debug("Done sorting followers.")
     db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
     if not os.path.exists(db_dir):
         debug("Directory %s doesn't exist. Creating now." % db_dir)
