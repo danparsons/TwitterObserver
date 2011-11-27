@@ -110,6 +110,12 @@ def record_followers(screen_name):
     followers_file = os.path.join(db_dir, TODAY + ".p")
     debug("Writing followers to %s in pickle format." % followers_file)
     cPickle.dump(followers, open(followers_file, 'wb'))
+    hits_remaining = api.rate_limit_status()['remaining_hits']
+    hits_reset_time = api.rate_limit_status()['reset_time']
+    debug("%d API hits remaining. Resets at %s." % (hits_remaining,
+          hits_reset_time))
+
+
 def display_report():
     """Parse _report and display it"""
     for screen_name in _report:
