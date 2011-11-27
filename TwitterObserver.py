@@ -116,6 +116,44 @@ def record_followers(screen_name):
           hits_reset_time))
 
 
+def create_followers_delta(screen_name):
+    """Compare today's followers for screen_name to yesterday's."""
+    global _report
+    lost_followers = []
+    new_followers = []
+    debug("--- create_followers_delta('%s')" % screen_name)
+    debug("Comparing followers between %s and %s for %s." % (TODAY, YESTERDAY,
+          screen_name))
+    db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
+    todays_followers_file = os.path.join(db_dir, TODAY + ".p")
+    yesterdays_followers_file = os.path.join(db_dir, YESTERDAY + ".p")
+    # Do we have followers recorded for today? If not, hit the API
+    if not os.path.exists(todays_followers_file):
+        record_followers(screen_name)
+    # Do we have followers recorded for yesterday? If not, terminate.
+    if not os.path.exists(yesterdays_followers_file):
+        print "ERROR: Followers not found for %s on %s." % (screen_name,
+                                                            YESTERDAY)
+        return
+    debug("Reading today's followers from disk.")
+    todays_followers_dict = cPickle.load(open(todays_followers_file, 'rb'))
+    debug("Reading yesterday's followers from disk.")
+    yesterdays_followers_dict = cPickle.load(open(yesterdays_followers_file,
+                                             'rb'))
+    todays_followers = todays_followers_dict.keys()
+    yesterdays_followers = yesterdays_followers_dict.keys()
+    diff = list(set(yesterdays_followers) ^ set(todays_followers))
+    for uid in diff:
+        if uid not in todays_followers_dict.keys():
+            lost_followers.append(uid)
+        if not uid in yesterdays_followers_dict.keys():
+            new_followers.append(uid)
+    for uid in lost_followers:
+        report(screen_name, 'Lost Followers', yesterdays_followers_dict[uid])
+    for uid in new_followers:
+        report(screen_name, 'New Followers', todays_followers_dict[uid])
+
+
 def display_report():
     """Parse _report and display it"""
     for screen_name in _report:
@@ -144,6 +182,8 @@ def main():
         try:
             if _config.get(screen_name, 'followers') == 'yes':
                 record_followers(screen_name)
+            if _config.get(screen_name, 'followers_report') == 'delta':
+                create_followers_delta(screen_name)
         except ConfigParser.NoOptionError:
             pass
     display_report()
