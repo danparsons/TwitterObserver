@@ -12,6 +12,7 @@ import tweepy
 _config = {}
 _report = {}
 DEBUG = False
+NOAPI = False
 RETRY_COUNT=0
 RETRY_DELAY=0
 
@@ -46,6 +47,8 @@ def process_arguments():
                       help='Config file path. Default: %default')
     parser.add_option('-d', '--debug', action='store_true', dest='debug',
                       help="Enable debugging output.")
+    parser.add_option('-n', '--no-api', action='store_true', dest='noapi',
+                      help='Disable Twitter API. Useful only for testing.')
     (options, args) = parser.parse_args()
     return options
 
@@ -73,6 +76,9 @@ def record_followers(screen_name):
     Will use request_token from [global] unless one is specified in [user].
     """
     debug("Recording followers for @%s." % screen_name)
+    if NOAPI:
+        debug("Twitter API disabled. Returning.")
+        return
     # If there is a request_token specified in the [user] section, then
     # use it. Otherwise, use the one from global.
     if (_config.has_option(screen_name, 'request_token_key') and 
@@ -119,9 +125,11 @@ def display_report():
 
 
 def main():
-    global DEBUG
+    global DEBUG, NOAPI
     options = process_arguments()
     if options.debug: DEBUG = True
+    if options.noapi:
+        NOAPI = True
     load_config(options.config)
     for screen_name in _config.sections():
         if screen_name == "global":
