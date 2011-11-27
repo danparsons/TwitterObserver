@@ -1,0 +1,25 @@
+TwitterObserver is a tool for recording and reporting on arbitrary Twitter
+users.
+
+It's designed to be run from cron once per day. It will record a user's
+followers, friends and other stuff to disk and then tell you what the
+differences are, via email, web report and Twitter DMs. In this way, you 
+can see who stopped following you, who started following you, etc.
+
+The design allows for scanning multiple users (not just yourself) and from 
+multiple points of view (different oAuth sessions, different HTTP proxies.)
+
+Extra features include:
+o Silent block detection (check if a user is blocking you, without them noticing)
+o Report on mutual followers / friends
+o Report on who has RT'd a user, and how often
+
+Known limitations:
+o Not all features are implemented yet. I just started! I'll write usage docs
+  when the tool is more complete. For now, look at -h and example_config.conf.
+
+o Due to Twitter's pagination and API rate limiting, you can easily run out
+  of API requests when scanning a user with a lot of followers.
+
+--Dan Parsons, @danparsons
+https://github.com/danparsons/TwitterObserver
