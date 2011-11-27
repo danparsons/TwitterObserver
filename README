@@ -14,6 +14,12 @@ o Silent block detection (check if a user is blocking you, without them noticing
 o Report on mutual followers / friends
 o Report on who has RT'd a user, and how often
 
+Requirements:
+o Tweepy. 'easy_install tweepy' should take care of it.
+o Your own Twitter oAuth request token key & secret. I'll write clear docs on
+  how to get this soon. Until then, see this URL:
+  https://dev.twitter.com/docs/auth
+
 Known limitations:
 o Not all features are implemented yet. I just started! I'll write usage docs
   when the tool is more complete. For now, look at -h and example_config.conf.
