@@ -74,7 +74,7 @@ def load_config(config_file):
 def record_tweeps(screen_name, tweep_type):
     """
     Retrieve followers for screen_name from Twitter and write them to disk.
-    Will use request_token from [global] unless one is specified in [user].
+    Will use access_token from [global] unless one is specified in [user].
     tweep_type is either "friends" or "followers"
     """
     if (tweep_type != "followers") and (tweep_type != "friends"):
@@ -85,18 +85,20 @@ def record_tweeps(screen_name, tweep_type):
     if NOAPI:
         debug("Twitter API disabled. Returning.")
         return
-    # If there is a request_token specified in the [user] section, then
+    # If there is a access_token specified in the [user] section, then
     # use it. Otherwise, use the one from global.
-    if (_config.has_option(screen_name, 'request_token_key') and
-        _config.has_option(screen_name, 'request_token_secret')):
-        debug("Using request_token from [%s] section." % screen_name)
-        key = _config.get(screen_name, 'request_token_key')
-        secret = _config.get(screen_name, 'request_token_secret')
+    if (_config.has_option(screen_name, 'access_token_key') and
+        _config.has_option(screen_name, 'access_token_secret')):
+        debug("Using access_token from [%s] section." % screen_name)
+        key = _config.get(screen_name, 'access_token_key')
+        secret = _config.get(screen_name, 'access_token_secret')
     else:
-        key = _config.get('global', 'request_token_key')
-        secret = _config.get('global', 'request_token_secret')
+        key = _config.get('global', 'access_token_key')
+        secret = _config.get('global', 'access_token_secret')
     auth = tweepy.OAuthHandler('', '', secure=True)
-    auth.set_request_token(key, secret)
+    debug("Using access_token_key: %s" % key)
+    debug("Using access_token_secret: %s" % secret)
+    auth.set_access_token(key, secret)
     api = tweepy.API(auth, secure=True)
     api.retry_count = RETRY_COUNT
     api.retry_delay = RETRY_DELAY
