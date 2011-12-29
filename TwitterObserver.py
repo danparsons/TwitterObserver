@@ -71,12 +71,17 @@ def load_config(config_file):
     _config = config
 
 
-def record_followers(screen_name):
+def record_tweeps(screen_name, tweep_type):
     """
     Retrieve followers for screen_name from Twitter and write them to disk.
     Will use request_token from [global] unless one is specified in [user].
+    tweep_type is either "friends" or "followers"
     """
-    debug("--- record_followers('%s')" % screen_name)
+    if (tweep_type != "followers") and (tweep_type != "friends"):
+        print "ERROR: parameter tweep_type for record_tweeps() must be either",
+        print "'friends' or 'followers'"
+        return
+    debug("--- record_tweeps('%s', '%s')" % (screen_name, tweep_type))
     if NOAPI:
         debug("Twitter API disabled. Returning.")
         return
@@ -95,19 +100,22 @@ def record_followers(screen_name):
     api = tweepy.API(auth, secure=True)
     api.retry_count = RETRY_COUNT
     api.retry_delay = RETRY_DELAY
-    # Retrieving id instead of screen_name in case a follower changes their
+    # Retrieving id instead of screen_name in case a tweep changes their
     # screen_name.
-    followers_iter = tweepy.Cursor(api.followers, id=screen_name).items()
-    followers = {}
-    debug("Receiving followers now.")
-    for follower in followers_iter:
-        followers[follower.id] = follower.screen_name
-    debug("Done receiving followers.")
+    if tweep_type == "followers":
+        tweeps_iter = tweepy.Cursor(api.followers, id=screen_name).items()
+    if tweep_type == "friends":
+        tweeps_iter = tweepy.Cursor(api.friends, id=screen_name).items()
+    tweeps = {}
+    debug("Receiving tweeps now.")
+    for tweep in tweeps_iter:
+        tweeps[tweep.id] = tweep.screen_name
+    debug("Done receiving tweeps.")
     db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
     if not os.path.exists(db_dir):
         debug("Directory %s doesn't exist. Creating now." % db_dir)
         os.makedirs(db_dir)
-    followers_file = os.path.join(db_dir, TODAY + ".p")
+    tweeps_file = os.path.join(db_dir, TODAY + "." + tweep_type + ".json")
     debug("Writing tweeps to %s in json format." % tweeps_file)
     fp = open(tweeps_file, 'w')
     fp.write(json.dumps(tweeps, sort_keys=True, indent=4))
@@ -118,42 +126,49 @@ def record_followers(screen_name):
           hits_reset_time))
 
 
-def create_followers_delta(screen_name):
+def create_tweeps_delta(screen_name, tweep_type):
     """Compare today's followers for screen_name to yesterday's."""
     global _report
-    lost_followers = []
-    new_followers = []
-    debug("--- create_followers_delta('%s')" % screen_name)
-    debug("Comparing followers between %s and %s for %s." % (TODAY, YESTERDAY,
-          screen_name))
+    if (tweep_type != "followers") and (tweep_type != "friends"):
+        print "ERROR: parameter tweep_type for create_tweeps_delta() must",
+        print "be either 'friends' or 'followers'"
+        return
+    lost_tweeps = []
+    new_tweeps = []
+    debug("--- create_tweeps_delta('%s', '%s')" % (screen_name, tweep_type))
+    debug("Comparing %s between %s and %s for %s." % (tweep_type, TODAY,
+          YESTERDAY, screen_name))
     db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
-    todays_followers_file = os.path.join(db_dir, TODAY + ".p")
-    yesterdays_followers_file = os.path.join(db_dir, YESTERDAY + ".p")
-    # Do we have followers recorded for today? If not, hit the API
-    if not os.path.exists(todays_followers_file):
-        record_followers(screen_name)
-    # Do we have followers recorded for yesterday? If not, terminate.
-    if not os.path.exists(yesterdays_followers_file):
-        print "ERROR: Followers not found for %s on %s." % (screen_name,
+    todays_tweeps_file = os.path.join(db_dir, TODAY + "." +
+                                      tweep_type + ".json")
+    yesterdays_tweeps_file = os.path.join(db_dir, YESTERDAY + "." +
+                                          tweep_type + ".json")
+    # Do we have tweeps recorded for today? If not, hit the API
+    if not os.path.exists(todays_tweeps_file):
+        record_tweeps(screen_name, tweep_type)
+    # Do we have tweeps recorded for yesterday? If not, terminate.
+    if not os.path.exists(yesterdays_tweeps_file):
+        print "ERROR: %s not found for %s on %s." % (tweep_type, screen_name,
                                                             YESTERDAY)
         return
-    debug("Reading today's followers from disk.")
-    debug("Reading yesterday's followers from disk.")
-                                             'rb'))
-    todays_followers = todays_followers_dict.keys()
-    yesterdays_followers = yesterdays_followers_dict.keys()
-    diff = list(set(yesterdays_followers) ^ set(todays_followers))
+    debug("Reading today's tweeps from disk.")
     todays_tweeps_dict = json.loads(open(todays_tweeps_file, 'r').read())
+    debug("Reading yesterday's tweeps from disk.")
     yesterdays_tweeps_dict = json.loads(open(yesterdays_tweeps_file,
+                                           'r').read())
+    todays_tweeps = todays_tweeps_dict.keys()
+    yesterdays_tweeps = yesterdays_tweeps_dict.keys()
+    diff = list(set(yesterdays_tweeps) ^ set(todays_tweeps))
     for uid in diff:
-        if uid not in todays_followers_dict.keys():
-            lost_followers.append(uid)
-        if not uid in yesterdays_followers_dict.keys():
-            new_followers.append(uid)
-    for uid in lost_followers:
-        report(screen_name, 'Lost Followers', yesterdays_followers_dict[uid])
-    for uid in new_followers:
-        report(screen_name, 'New Followers', todays_followers_dict[uid])
+        if uid not in todays_tweeps_dict.keys():
+            lost_tweeps.append(uid)
+        if not uid in yesterdays_tweeps_dict.keys():
+            new_tweeps.append(uid)
+    for uid in lost_tweeps:
+        report(screen_name, 'Lost %s' % tweep_type,
+               yesterdays_tweeps_dict[uid])
+    for uid in new_tweeps:
+        report(screen_name, 'New %s' % tweep_type, todays_tweeps_dict[uid])
 
 
 def display_report():
@@ -183,9 +198,13 @@ def main():
             continue
         try:
             if _config.get(screen_name, 'followers') == 'yes':
-                record_followers(screen_name)
+                record_tweeps(screen_name, 'followers')
             if _config.get(screen_name, 'followers_report') == 'delta':
-                create_followers_delta(screen_name)
+                create_tweeps_delta(screen_name, 'followers')
+            if _config.get(screen_name, 'friends') == 'yes':
+                record_tweeps(screen_name, 'friends')
+            if _config.get(screen_name, 'friends_report') == 'delta':
+                create_tweeps_delta(screen_name, 'friends')
         except ConfigParser.NoOptionError:
             pass
     display_report()
