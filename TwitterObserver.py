@@ -3,7 +3,7 @@
 import os
 import sys
 import datetime
-import cPickle
+import json
 import ConfigParser
 import optparse
 
@@ -108,8 +108,10 @@ def record_followers(screen_name):
         debug("Directory %s doesn't exist. Creating now." % db_dir)
         os.makedirs(db_dir)
     followers_file = os.path.join(db_dir, TODAY + ".p")
-    debug("Writing followers to %s in pickle format." % followers_file)
-    cPickle.dump(followers, open(followers_file, 'wb'))
+    debug("Writing tweeps to %s in json format." % tweeps_file)
+    fp = open(tweeps_file, 'w')
+    fp.write(json.dumps(tweeps, sort_keys=True, indent=4))
+    fp.close()
     hits_remaining = api.rate_limit_status()['remaining_hits']
     hits_reset_time = api.rate_limit_status()['reset_time']
     debug("%d API hits remaining. Resets at %s." % (hits_remaining,
@@ -136,13 +138,13 @@ def create_followers_delta(screen_name):
                                                             YESTERDAY)
         return
     debug("Reading today's followers from disk.")
-    todays_followers_dict = cPickle.load(open(todays_followers_file, 'rb'))
     debug("Reading yesterday's followers from disk.")
-    yesterdays_followers_dict = cPickle.load(open(yesterdays_followers_file,
                                              'rb'))
     todays_followers = todays_followers_dict.keys()
     yesterdays_followers = yesterdays_followers_dict.keys()
     diff = list(set(yesterdays_followers) ^ set(todays_followers))
+    todays_tweeps_dict = json.loads(open(todays_tweeps_file, 'r').read())
+    yesterdays_tweeps_dict = json.loads(open(yesterdays_tweeps_file,
     for uid in diff:
         if uid not in todays_followers_dict.keys():
             lost_followers.append(uid)
