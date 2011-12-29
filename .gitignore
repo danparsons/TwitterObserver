@@ -2,3 +2,5 @@ db/*
 specs.txt
 
 private_config.conf
+
+listadd.py
