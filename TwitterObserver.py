@@ -13,8 +13,8 @@ _config = {}
 _report = {}
 DEBUG = False
 NOAPI = False
-RETRY_COUNT=0
-RETRY_DELAY=0
+RETRY_COUNT=10
+RETRY_DELAY=5
 
 TODAY=datetime.datetime.now().strftime("%Y-%m-%d")
 YESTERDAY=(datetime.datetime.now() -
