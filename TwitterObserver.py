@@ -99,7 +99,11 @@ def record_tweeps(screen_name, tweep_type):
     debug("Using access_token_key: %s" % key)
     debug("Using access_token_secret: %s" % secret)
     auth.set_access_token(key, secret)
-    api = tweepy.API(auth, secure=True)
+    if key == "None":
+        debug("Using no authentication")
+        api = tweepy.API()
+    else:
+        api = tweepy.API(auth, secure=True)
     api.retry_count = RETRY_COUNT
     api.retry_delay = RETRY_DELAY
     # Retrieving id instead of screen_name in case a tweep changes their
