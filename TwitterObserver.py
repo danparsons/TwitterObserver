@@ -99,6 +99,10 @@ def record_tweeps(screen_name, tweep_type):
     debug("Using access_token_key: %s" % key)
     debug("Using access_token_secret: %s" % secret)
     auth.set_access_token(key, secret)
+    if (key == '') or (secret == ''):
+        print "ERROR: access_token_key and access_token_secret cannot",
+        print "be blank."
+        sys.exit(-1)
     if key == "None":
         debug("Using no authentication")
         api = tweepy.API()
