@@ -20,6 +20,8 @@ TODAY=datetime.datetime.now().strftime("%Y-%m-%d")
 YESTERDAY=(datetime.datetime.now() -
           datetime.timedelta(days = 1)).strftime("%Y-%m-%d")
 
+VALID_TWEEP_TYPES = ['followers', 'friends', 'favorites']
+
 
 def debug(msg):
     """Print debugging messages"""
@@ -35,7 +37,10 @@ def report(screen_name, section, msg):
     if section not in _report[screen_name].keys():
         _report[screen_name][section] = ''
     else:
-        _report[screen_name][section] += ', '
+        if 'favorites' in section:
+            _report[screen_name][section] += "\n"
+        else:
+            _report[screen_name][section] += ', '
     _report[screen_name][section] += msg
 
 
@@ -75,11 +80,10 @@ def record_tweeps(screen_name, tweep_type):
     """
     Retrieve followers for screen_name from Twitter and write them to disk.
     Will use access_token from [global] unless one is specified in [user].
-    tweep_type is either "friends" or "followers"
     """
-    if (tweep_type != "followers") and (tweep_type != "friends"):
-        print "ERROR: parameter tweep_type for record_tweeps() must be either",
-        print "'friends' or 'followers'"
+    if tweep_type not in VALID_TWEEP_TYPES:
+        print "ERROR: parameter tweep_type for record_tweeps() must be one of",
+        print VALID_TWEEP_TYPES
         return
     debug("--- record_tweeps('%s', '%s')" % (screen_name, tweep_type))
     if NOAPI:
@@ -116,10 +120,20 @@ def record_tweeps(screen_name, tweep_type):
         tweeps_iter = tweepy.Cursor(api.followers, id=screen_name).items()
     if tweep_type == "friends":
         tweeps_iter = tweepy.Cursor(api.friends, id=screen_name).items()
+    if tweep_type == "favorites":
+        tweeps_iter = tweepy.Cursor(api.favorites, id=screen_name).items()
     tweeps = {}
     debug("Receiving tweeps now.")
     for tweep in tweeps_iter:
-        tweeps[tweep.id] = tweep.screen_name
+        if tweep_type == "favorites":
+            _msg = '@%s: "%s" at %s. RTd %s time(s).' % \
+                   (tweep.author.screen_name,
+                    tweep.text,
+                    tweep.created_at,
+                    tweep.retweet_count)
+            tweeps[tweep.id] = _msg
+        else:
+            tweeps[tweep.id] = tweep.screen_name
     debug("Done receiving tweeps.")
     db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
     if not os.path.exists(db_dir):
@@ -139,9 +153,10 @@ def record_tweeps(screen_name, tweep_type):
 def create_tweeps_delta(screen_name, tweep_type):
     """Compare today's followers for screen_name to yesterday's."""
     global _report
-    if (tweep_type != "followers") and (tweep_type != "friends"):
+    if tweep_type not in VALID_TWEEP_TYPES:
         print "ERROR: parameter tweep_type for create_tweeps_delta() must",
-        print "be either 'friends' or 'followers'"
+        print "be one of ",
+        print VALID_TWEEP_TYPES
         return
     lost_tweeps = []
     new_tweeps = []
@@ -191,8 +206,11 @@ def display_report():
         print title
         print bar
         for section in _report[screen_name]:
-            print "%s: %s" % (section, _report[screen_name][section])
-        print
+            if 'favorites' in section:
+                print "%s:\n%s\n" % (section, _report[screen_name][section])
+            else:
+                print "%s: %s\n" % (section, _report[screen_name][section])
+        print "\n\n"
 
 
 def main():
@@ -215,6 +233,10 @@ def main():
                 record_tweeps(screen_name, 'friends')
             if _config.get(screen_name, 'friends_report') == 'delta':
                 create_tweeps_delta(screen_name, 'friends')
+            if _config.get(screen_name, 'favorites') == 'yes':
+                record_tweeps(screen_name, 'favorites')
+            if _config.get(screen_name, 'favorites_report') == 'delta':
+                create_tweeps_delta(screen_name, 'favorites')
         except ConfigParser.NoOptionError:
             pass
     display_report()
