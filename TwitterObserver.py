@@ -207,9 +207,10 @@ def display_report():
         print bar
         for section in _report[screen_name]:
             if 'favorites' in section:
-                print "%s:\n%s\n" % (section, _report[screen_name][section])
+                msg = "%s:\n%s\n" % (section, _report[screen_name][section])
             else:
-                print "%s: %s\n" % (section, _report[screen_name][section])
+                msg = "%s: %s\n" % (section, _report[screen_name][section])
+        print msg.encode("UTF-8")
         print "\n\n"
 
 
