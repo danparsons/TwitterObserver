@@ -210,8 +210,8 @@ def display_report():
                 msg = "%s:\n%s\n" % (section, _report[screen_name][section])
             else:
                 msg = "%s: %s\n" % (section, _report[screen_name][section])
-        print msg.encode("UTF-8")
-        print "\n\n"
+            print msg.encode("UTF-8")
+        print "\n"
 
 
 def main():
