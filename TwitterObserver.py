@@ -128,7 +128,7 @@ def record_tweeps(screen_name, tweep_type):
     if os.path.exists(tweeps_file):
 	    debug("%s exists, skipping downloading tweeps for %s." % \
 		      (tweeps_file, screen_name))
-		return
+        return
     debug("Receiving tweeps now.")
     for tweep in tweeps_iter:
         if tweep_type == "favorites":
