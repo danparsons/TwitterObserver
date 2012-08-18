@@ -125,7 +125,7 @@ def record_tweeps(screen_name, tweep_type):
     tweeps = {}
     db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
     tweeps_file = os.path.join(db_dir, TODAY + "." + tweep_type + ".json")
-	if os.path.exists(tweeps_file):
+    if os.path.exists(tweeps_file):
 		print "%s exists, skipping downloading tweeps for %s." % \
 		      (tweeps_file, screen_name)
 		return
