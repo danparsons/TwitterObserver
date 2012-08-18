@@ -1,6 +1,5 @@
 db/*
 specs.txt
-
+*.sublime*
 private_config.conf
-
 listadd.py

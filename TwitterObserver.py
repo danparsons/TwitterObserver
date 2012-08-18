@@ -123,6 +123,12 @@ def record_tweeps(screen_name, tweep_type):
     if tweep_type == "favorites":
         tweeps_iter = tweepy.Cursor(api.favorites, id=screen_name).items()
     tweeps = {}
+    db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
+    tweeps_file = os.path.join(db_dir, TODAY + "." + tweep_type + ".json")
+	if os.path.exists(tweeps_file):
+		print "%s exists, skipping downloading tweeps for %s." % \
+		      (tweeps_file, screen_name)
+		return
     debug("Receiving tweeps now.")
     for tweep in tweeps_iter:
         if tweep_type == "favorites":
@@ -135,11 +141,9 @@ def record_tweeps(screen_name, tweep_type):
         else:
             tweeps[tweep.id] = tweep.screen_name
     debug("Done receiving tweeps.")
-    db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
     if not os.path.exists(db_dir):
         debug("Directory %s doesn't exist. Creating now." % db_dir)
         os.makedirs(db_dir)
-    tweeps_file = os.path.join(db_dir, TODAY + "." + tweep_type + ".json")
     debug("Writing tweeps to %s in json format." % tweeps_file)
     fp = open(tweeps_file, 'w')
     fp.write(json.dumps(tweeps, sort_keys=True, indent=4))
