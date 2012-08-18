@@ -243,6 +243,13 @@ def main():
                 create_tweeps_delta(screen_name, 'favorites')
         except ConfigParser.NoOptionError:
             pass
+    # Have we already displayed a report today?
+    reported_file = os.path.join(_config.get('global', 'db_path'), TODAY)
+    if os.path.exists(reported_file):
+        debug("Already reported today, exiting")
+        sys.exit(0)
+    fp = open(reported_file, 'w')
+    fp.close()
     display_report()
 
 if __name__ == '__main__':
