@@ -6,20 +6,19 @@ import datetime
 import json
 import ConfigParser
 import optparse
-
 import tweepy
 
 _config = {}
 _report = {}
 DEBUG = False
 NOAPI = False
-RETRY_COUNT=10
-RETRY_DELAY=5
 FORCE_DOWNLOAD = False
+RETRY_COUNT = 10
+RETRY_DELAY = 5
 
-TODAY=datetime.datetime.now().strftime("%Y-%m-%d")
-YESTERDAY=(datetime.datetime.now() -
-          datetime.timedelta(days = 1)).strftime("%Y-%m-%d")
+TODAY = datetime.datetime.now().strftime("%Y-%m-%d")
+YESTERDAY = (datetime.datetime.now() -
+             datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
 VALID_TWEEP_TYPES = ['followers', 'friends', 'favorites']
 
@@ -47,8 +46,7 @@ def report(screen_name, section, msg):
 
 def process_arguments():
     parser = optparse.OptionParser(version="%prog 0.1")
-    parser.set_usage("%prog [options]\nObserve and report arbitrary Twitter" +
-                      " users")
+    parser.set_usage("%prog [options]\nObserve and report arbitrary Twitter users")
     parser.add_option('-c', '--config', dest='config',
                       default='~/.TwitterObserver.conf',
                       help='Config file path. Default: %default')
@@ -93,8 +91,7 @@ def record_tweeps(screen_name, tweep_type):
         return
     # If there is a access_token specified in the [user] section, then
     # use it. Otherwise, use the one from global.
-    if (_config.has_option(screen_name, 'access_token_key') and
-        _config.has_option(screen_name, 'access_token_secret')):
+    if (_config.has_option(screen_name, 'access_token_key') and _config.has_option(screen_name, 'access_token_secret')):
         debug("Using access_token from [%s] section." % screen_name)
         key = _config.get(screen_name, 'access_token_key')
         secret = _config.get(screen_name, 'access_token_secret')
@@ -127,7 +124,6 @@ def record_tweeps(screen_name, tweep_type):
     tweeps = {}
     db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
     tweeps_file = os.path.join(db_dir, TODAY + "." + tweep_type + ".json")
-    if os.path.exists(tweeps_file):
     if os.path.exists(tweeps_file) and FORCE_DOWNLOAD != False:
         debug("%s exists, skipping downloading tweeps for %s." % (tweeps_file, screen_name))
         return
@@ -179,14 +175,12 @@ def create_tweeps_delta(screen_name, tweep_type):
         record_tweeps(screen_name, tweep_type)
     # Do we have tweeps recorded for yesterday? If not, terminate.
     if not os.path.exists(yesterdays_tweeps_file):
-        print "ERROR: %s not found for %s on %s." % (tweep_type, screen_name,
-                                                            YESTERDAY)
+        print "ERROR: %s not found for %s on %s." % (tweep_type, screen_name, YESTERDAY)
         return
     debug("Reading today's tweeps from disk.")
     todays_tweeps_dict = json.loads(open(todays_tweeps_file, 'r').read())
     debug("Reading yesterday's tweeps from disk.")
-    yesterdays_tweeps_dict = json.loads(open(yesterdays_tweeps_file,
-                                           'r').read())
+    yesterdays_tweeps_dict = json.loads(open(yesterdays_tweeps_file, 'r').read())
     todays_tweeps = todays_tweeps_dict.keys()
     yesterdays_tweeps = yesterdays_tweeps_dict.keys()
     diff = list(set(yesterdays_tweeps) ^ set(todays_tweeps))
