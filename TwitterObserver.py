@@ -15,6 +15,7 @@ DEBUG = False
 NOAPI = False
 RETRY_COUNT=10
 RETRY_DELAY=5
+FORCE_DOWNLOAD = False
 
 TODAY=datetime.datetime.now().strftime("%Y-%m-%d")
 YESTERDAY=(datetime.datetime.now() -
@@ -55,6 +56,7 @@ def process_arguments():
                       help="Enable debugging output.")
     parser.add_option('-n', '--no-api', action='store_true', dest='noapi',
                       help='Disable Twitter API. Useful only for testing.')
+    parser.add_option('-f', '--force-download', action='store_true', dest='force_download', help="Force tweep download, even if data already exists for today")
     (options, args) = parser.parse_args()
     return options
 
@@ -126,6 +128,7 @@ def record_tweeps(screen_name, tweep_type):
     db_dir = os.path.join(_config.get('global', 'db_path'), screen_name)
     tweeps_file = os.path.join(db_dir, TODAY + "." + tweep_type + ".json")
     if os.path.exists(tweeps_file):
+    if os.path.exists(tweeps_file) and FORCE_DOWNLOAD != False:
         debug("%s exists, skipping downloading tweeps for %s." % (tweeps_file, screen_name))
         return
     debug("Receiving tweeps now.")
@@ -224,6 +227,8 @@ def main():
         DEBUG = True
     if options.noapi:
         NOAPI = True
+    if options.force_download:
+        FORCE_DOWNLOAD = True
     load_config(options.config)
     for screen_name in _config.sections():
         if screen_name == "global":
