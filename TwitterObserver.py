@@ -6,6 +6,7 @@ import datetime
 import json
 import ConfigParser
 import optparse
+import httplib
 import tweepy
 
 _config = {}
@@ -212,6 +213,15 @@ def display_report():
                 msg = "%s: %s\n" % (section, _report[screen_name][section])
             print msg.encode("UTF-8")
         print "\n"
+
+
+def try_record_tweeps(screen_name, tweep_type):
+    """Wrap calls to Twitter API in try/except due to frequent HTTP incomplete reads"""
+    try:
+        record_tweeps(screen_name, tweep_type)
+    except httplib.IncompleteRead:
+        debug("httplib.IncompleteRead exception, trying record_tweeps('%s', '%s') again" % (screen_name, tweep_type))
+        try_record_tweeps(screen_name, tweep_type)
 
 
 def main():
