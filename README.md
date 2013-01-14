@@ -1,3 +1,5 @@
+TwitterObserver
+===============
 TwitterObserver is a tool for recording and reporting on arbitrary Twitter
 users.
 
@@ -10,30 +12,23 @@ started following you, etc.
 The design allows for scanning multiple users (not just yourself) and from 
 multiple points of view (different oAuth sessions, different HTTP proxies.)
 
-Extra features include:
-o Silent block detection (check if a user is blocking you, without them noticing)
-o Report on mutual followers / friends
-o Report on who has RT'd a user, and how often
+Features
+========
+* Silent block detection (check if a user is blocking you, without them noticing)
+* Report on mutual followers / friends
+* Report on who has RT'd a user, and how often
 
-Requirements:
-o Tweepy. 'easy_install tweepy' should take care of it.
-o Your own Twitter oAuth request token key & secret. I'll write clear docs on
-  how to get this soon. Until then, see this URL:
-  https://dev.twitter.com/docs/auth
+Requirements
+============
+* Tweepy. 'easy_install tweepy' should take care of it.
+* Your own Twitter oAuth request token key & secret. I'll write clear docs on how to get this soon. Until then, see this URL: https://dev.twitter.com/docs/auth
 
-Known limitations:
-o Not all features are implemented yet. I just started! I'll write usage docs
-  when the tool is more complete. For now, look at -h and example_config.conf.
+Known limitations
+=================
+* Not all features are implemented yet. I just started! I'll write usage docs when the tool is more complete. For now, look at -h and example_config.conf.
+* Due to Twitter's pagination and API rate limiting, you can easily run out of API requests when scanning a user with a lot of followers. You get 150 API calls per hour, and Twitter returns only 100 followers per call.
 
-o Due to Twitter's pagination and API rate limiting, you can easily run out
-  of API requests when scanning a user with a lot of followers. You get 150
-  API calls per hour, and Twitter returns only 100 followers per call.
-
-Credits:
-o Joshua Roesslein for making the awesome tweepy library.
-
-o A bunch of jerks from Montreal, QC for inspiring some of TwitterObserver's
-  features.
-
---Dan Parsons, @danparsons
-https://github.com/danparsons/TwitterObserver
+Credits
+=======
+* Joshua Roesslein for making the awesome tweepy library.
+* A bunch of jerks from Montreal, QC for inspiring some of TwitterObserver's features :)
